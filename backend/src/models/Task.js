@@ -23,7 +23,13 @@ const getAllTasks = async () => {
   return result.rows;
 };
 
-const updateTask = async (id, title, description) => {
+const deleteTaskById = async (id) => {
+  const query = 'DELETE FROM tasks WHERE id = $1 RETURNING *';
+  const result = await pool.query(query, [id]);
+  return result.rows[0];
+};
+
+const updateTaskById = async (id, title, description) => {
   const query = `
     UPDATE tasks
     SET title = $1, description = $2
@@ -35,10 +41,4 @@ const updateTask = async (id, title, description) => {
   return result.rows[0];
 };
 
-const deleteTask = async (id) => {
-  const query = 'DELETE FROM tasks WHERE id = $1 RETURNING *';
-  const result = await pool.query(query, [id]);
-  return result.rows[0];
-};
-
-module.exports = { createTask, getTasksByUser, getAllTasks, updateTask, deleteTask };
+module.exports = { createTask, getTasksByUser, getAllTasks, deleteTaskById, updateTaskById };
