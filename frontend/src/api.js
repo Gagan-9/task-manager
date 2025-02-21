@@ -5,7 +5,7 @@ const API_URL = 'http://localhost:3000/api';
 // Login API
 const login = async (email, password) => {
   const response = await axios.post(`${API_URL}/auth/login`, { email, password });
-  return response.data.token;
+  return { token: response.data.token, role: response.data.role }; 
 };
 
 // Register API
@@ -21,7 +21,6 @@ const createUser = async (user, token) => {
   });
   return response.data;
 };
-
 // Update User API (for admin)
 const updateUserById = async (id, user, token) => {
   const response = await axios.put(`${API_URL}/admin/users/${id}`, user, {

@@ -10,9 +10,16 @@ const Login = ({ setToken, setRole }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = await login(email, password);
+      const { token, role } = await login(email, password); // Destructure token and role
       setToken(token);
-      navigate('/tasks');
+      setRole(role); // Set the role in the state
+
+      // Redirect based on role
+      if (role === 'admin') {
+        navigate('/admin'); // Redirect to admin dashboard
+      } else {
+        navigate('/tasks'); // Redirect to tasks page
+      }
     } catch (error) {
       alert('Login failed');
     }

@@ -24,11 +24,20 @@ const AdminDashboard = ({ token }) => {
     await deleteUserById(id, token);
     fetchUsers(); // Refresh the list after deletion
   };
-
   const handleCreateUser = async () => {
-    await createUser(newUser, token);
-    setNewUser({ name: '', email: '', password: '', role: 'user' });
-    fetchUsers(); // Refresh the list after creation
+    try {
+      const { name, email, password, role } = newUser;
+      if (!name || !email || !password || !role) {
+        alert('All fields are required');
+        return;
+      }
+      const createdUser = await createUser({ name, email, password, role }, token);
+      setNewUser({ name: '', email: '', password: '', role: 'user' }); // Reset form
+      setUsers([...users, createdUser]); // Update the list of users
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      alert('Failed to create user');
+    }
   };
 
   const handleUpdateUser = async () => {
@@ -36,6 +45,7 @@ const AdminDashboard = ({ token }) => {
     setEditUser(null);
     fetchUsers(); // Refresh the list after update
   };
+  
 
   return (
     <div>

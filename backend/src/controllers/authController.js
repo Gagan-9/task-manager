@@ -11,7 +11,7 @@ const login = async (req, res) => {
   }
 
   const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  res.json({ token });
+  res.json({ token, role: user.role }); // Include role in the response
 };
 
 const register = async (req, res) => {

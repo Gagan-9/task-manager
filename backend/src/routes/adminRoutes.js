@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, deleteUserById } = require('../models/User');
+const { getAllUsers, deleteUserById, updateUserById, createUser } = require('../models/User');
 const { getAllTasks, deleteTaskById, updateTaskById } = require('../models/Task');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
+const bcrypt = require('bcrypt');
 
 // Admin-only routes
 router.get('/users', authMiddleware, roleMiddleware('admin'), async (req, res) => {
@@ -32,18 +33,36 @@ router.put('/tasks/:id', authMiddleware, roleMiddleware('admin'), async (req, re
   res.json(task);
 });
 
-// Create User
+// Create User (admin only)
 router.post('/users', authMiddleware, roleMiddleware('admin'), async (req, res) => {
+  try {
     const { name, email, password, role } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await createUser(name, email, hashedPassword, role);
+
+    // Validate required fields
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const user = await createUser(name, email, password, role);
     res.status(201).json(user);
-  });
-  
-// Update User
+  } catch (error) {
+    console.error('Error creating user:', error);
+
+    // Handle specific errors
+    if (error.code === '23505') { // Unique constraint violation (e.g., duplicate email)
+      return res.status(400).json({ message: 'Email already exists' });
+    }
+
+    res.status(500).json({ message: 'Failed to create user' });
+  }
+});
+// Update User (admin only)
 router.put('/users/:id', authMiddleware, roleMiddleware('admin'), async (req, res) => {
-    const { name, email, role } = req.body;
-    const user = await updateUserById(req.params.id, { name, email, role });
+  try {
+    const user = await updateUserById(req.params.id, req.body);
     res.json(user);
-  });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update user' });
+  }
+});
 module.exports = router;
